@@ -154,8 +154,31 @@ def getRMS(digest1, digest2):
     rms /= count
     return rms
 
-digest1 = getAudioDigest('aaa.wav')
-digest2 = getAudioDigest('aaa.wav')
-rms = getRMS(digest1, digest2)
+def compare(obj):
+    digestA = getAudioDigest(obj['a'])
+    if digestA == None:
+        return None
+    best = None
+    minRMS = 1.0
+    tolerance = obj['t']
+    i = 0
+    while i < len(obj['l']):
+        digestL = getAudioDigest(obj['l'][i])
+        if digestL == None:
+            i += 1
+            continue
+        rms = getRMS(digestL, digestA)
+        if rms <= tolerance and rms < minRMS:
+            best = obj['l'][i]
+            minRMS = rms
+        i += 1
+    return { 'best': best, 'acc': 1.0 - rms }
 
-print(rms)
+while True:
+    lst = input()
+    if lst == 'q':
+        break
+    obj = json.loads(lst)
+    cmpr = compare(obj)
+    print(json.dumps(cmpr))
+
